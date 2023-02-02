@@ -11,7 +11,7 @@ from aiida.plugins import DataFactory
 DiffParameters = DataFactory("bigdft_new")
 
 
-class DiffCalculation(CalcJob):
+class BigDFTCalculation(CalcJob):
     """
     AiiDA calculation plugin wrapping the diff executable.
 
