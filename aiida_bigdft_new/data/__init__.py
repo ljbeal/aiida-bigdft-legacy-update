@@ -41,7 +41,7 @@ class BigDFTParameters(Dict):  # pylint: disable=too-many-ancestors
         dict = self.validate(dict)
         super().__init__(dict=dict, **kwargs)
 
-    def validate(self, parameters_dict):
+    def validate(self, parameters_dict):  # Can we remove this and put all args within an inpfile?
         """Validate command line options.
 
         Uses the voluptuous package for validation. Find out about allowed keys using::
