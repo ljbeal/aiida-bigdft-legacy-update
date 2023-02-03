@@ -10,6 +10,8 @@ from aiida.engine import CalcJob
 from aiida.orm import SinglefileData, StructureData, Str
 from aiida.plugins import DataFactory
 
+from BigDFT.Inputfiles import Inputfile
+
 BigDFTParameters = DataFactory("bigdft_new")
 
 
@@ -95,7 +97,48 @@ class BigDFTCalculation(CalcJob):
             needed by the calculation.
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
+
+        def write_posinp(structure):
+            # posinp_filename = self.inputs.structurefile.value
+            posinp_filename = 'Not Written'
+            if self.inputs.structure is not None:
+                if self.inputs.structure.cell_angles != [90.0, 90.0, 90.0]:
+                    raise ValueError('non orthorhombic cells are not supported')
+
+                print("writing input posinp file")
+                posinp_string = self.inputs.structure._prepare_xyz()[0]
+                # set bcs at the correct format (periodic only?)
+                if self.inputs.structure.pbc == (True, True, True):
+                    filestring = posinp_string.split(b'\n')
+                    line = "periodic " + str(self.inputs.structure.cell_lengths[0]) + " "\
+                           + str(self.inputs.structure.cell_lengths[1]) + " "\
+                           + str(self.inputs.structure.cell_lengths[2])
+                    filestring[1] = line.encode()
+                    posinp_string = b'\n'.join(filestring)
+
+                if "jobname" not in self.inputs.metadata.options:
+                    posinp_filename = self._posinp
+                else:
+                    posinp_filename = self.inputs.metadata.options.jobname + ".xyz"
+
+                # write posinp, open file in correct format
+                fmode = 'w+' if isinstance(posinp_string, str) else 'wb+'
+                with open(posinp_filename, fmode) as posfile:
+                    posfile.write(posinp_string)
+
+            return SinglefileData(os.path.join(os.getcwd(), posinp_filename)).store()
+
         print('preparing for submission')
+
+        inpdict = Inputfile()
+        inpdict.update(self.inputs.parameters.get_dict())
+
+        print('inp dict is')
+        print(inpdict)
+
+        posinp_file = write_posinp(self.inputs.structure)
+        print('posinp written to', posinp_file)
+
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
         codeinfo.withmpi = self.inputs.metadata.options.withmpi
@@ -104,11 +147,11 @@ class BigDFTCalculation(CalcJob):
         calcinfo = datastructures.CalcInfo()
         calcinfo.codes_info = [codeinfo]
         calcinfo.local_copy_list = [
-            # (
-            #     self.inputs.output_file.uuid,
-            #     self.inputs.output_file.filename,
-            #     self.inputs.output_file.filename,
-            # ),
+            (
+                posinp_file.uuid,
+                posinp_file.filename,
+                posinp_file.filename,
+            ),
         ]
         calcinfo.retrieve_list = [self.metadata.options.output_filename]
 
