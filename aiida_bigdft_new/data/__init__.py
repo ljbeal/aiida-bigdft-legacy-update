@@ -11,8 +11,8 @@ from aiida.orm import Dict
 
 # A subset of diff's command line options
 cmdline_options = {
-    Optional("-n"): str,   # input filename
-    Optional("-s"): bool,  # skip flag
+    Optional("dft"): dict,   # input filename
+    Optional("output"): dict,  # skip flag
 }
 
 
@@ -53,28 +53,6 @@ class BigDFTParameters(Dict):  # pylint: disable=too-many-ancestors
         :returns: validated dictionary
         """
         return BigDFTParameters.schema(parameters_dict)
-
-    def cmdline_params(self, file1_name, file2_name):
-        """Synthesize command line parameters.
-
-        e.g. [ '--ignore-case', 'filename1', 'filename2']
-
-        :param file_name1: Name of first file
-        :param type file_name1: str
-        :param file_name2: Name of second file
-        :param type file_name2: str
-
-        """
-        parameters = []
-
-        pm_dict = self.get_dict()
-        for option, enabled in pm_dict.items():
-            if enabled:
-                parameters += ["--" + option]
-
-        parameters += [file1_name, file2_name]
-
-        return [str(p) for p in parameters]
 
     def __str__(self):
         """String representation of node.

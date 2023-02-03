@@ -13,10 +13,10 @@ import tempfile
 from aiida.common.exceptions import NotExistent
 from aiida.orm import Code, Computer
 
-LOCALHOST_NAME = "localhost-test"
+LOCALHOST_NAME = "localhost"
 
 executables = {
-    "bigdft_new": "diff",
+    "bigdft_new": "bigdft",
 }
 
 

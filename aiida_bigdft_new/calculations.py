@@ -3,20 +3,25 @@ Calculations provided by aiida_bigdft_new.
 
 Register calculations via the "aiida.calculations" entry point in setup.json.
 """
+import os
+
 from aiida.common import datastructures
 from aiida.engine import CalcJob
-from aiida.orm import SinglefileData
+from aiida.orm import SinglefileData, StructureData, Str
 from aiida.plugins import DataFactory
 
-DiffParameters = DataFactory("bigdft_new")
+BigDFTParameters = DataFactory("bigdft_new")
 
 
 class BigDFTCalculation(CalcJob):
     """
-    AiiDA calculation plugin wrapping the diff executable.
-
-    Simple AiiDA plugin wrapper for 'diffing' two files.
+    AiiDA calculation plugin wrapping the BigDFT executable.
     """
+
+    _posinp = 'posinp.xyz'
+    _inpfile = 'input.yaml'
+    _logfile = 'log.yaml'
+    _timefile = 'time.yaml'
 
     @classmethod
     def define(cls, spec):
@@ -30,31 +35,56 @@ class BigDFTCalculation(CalcJob):
         }
         spec.inputs["metadata"]["options"]["parser_name"].default = "bigdft_new"
 
-        # new ports
+        # inputs
+        # structure input. Either AiiDA structuredata, or direct posinp file
         spec.input(
-            "metadata.options.output_filename", valid_type=str, default="patch.diff"
+            "structure",
+            valid_type=StructureData
+        )
+        spec.input(
+            "posinp",
+            valid_type=Str,
+            default=lambda: Str(BigDFTCalculation._posinp),
+            help='structure xyz file'
+        )
+        spec.input(
+            "metadata.options.jobname",
+            valid_type=str,
+            required=False
         )
         spec.input(
             "parameters",
-            valid_type=DiffParameters,
-            help="Command line parameters for diff",
-        )
-        spec.input(
-            "file1", valid_type=SinglefileData, help="First file to be compared."
-        )
-        spec.input(
-            "file2", valid_type=SinglefileData, help="Second file to be compared."
-        )
-        spec.output(
-            "bigdft_new",
-            valid_type=SinglefileData,
-            help="diff between file1 and file2.",
+            valid_type=BigDFTParameters,
+            help="Command line parameters for BigDFT",
         )
 
+        # outputs
+        spec.input(
+            "metadata.options.output_filename",
+            valid_type=str,
+            default=BigDFTCalculation._logfile
+        )
+
+        # error codes
         spec.exit_code(
             300,
             "ERROR_MISSING_OUTPUT_FILES",
             message="Calculation did not produce all expected output files.",
+        )
+        spec.exit_code(
+            301,
+            "ERROR_PARSING_FAILED",
+            message="Parsing error.",
+        )
+        spec.exit_code(
+            400,
+            'ERROR_OUT_OF_WALLTIME',
+            message='Calculation did not finish because of a walltime issue.'
+        )
+        spec.exit_code(
+            401,
+            'ERROR_OUT_OF_MEMORY',
+            message='Calculation did not finish because of memory limit.'
         )
 
     def prepare_for_submission(self, folder):
@@ -65,28 +95,20 @@ class BigDFTCalculation(CalcJob):
             needed by the calculation.
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
+        print('preparing for submission')
         codeinfo = datastructures.CodeInfo()
-        codeinfo.cmdline_params = self.inputs.parameters.cmdline_params(
-            file1_name=self.inputs.file1.filename, file2_name=self.inputs.file2.filename
-        )
         codeinfo.code_uuid = self.inputs.code.uuid
-        codeinfo.stdout_name = self.metadata.options.output_filename
         codeinfo.withmpi = self.inputs.metadata.options.withmpi
 
         # Prepare a `CalcInfo` to be returned to the engine
         calcinfo = datastructures.CalcInfo()
         calcinfo.codes_info = [codeinfo]
         calcinfo.local_copy_list = [
-            (
-                self.inputs.file1.uuid,
-                self.inputs.file1.filename,
-                self.inputs.file1.filename,
-            ),
-            (
-                self.inputs.file2.uuid,
-                self.inputs.file2.filename,
-                self.inputs.file2.filename,
-            ),
+            # (
+            #     self.inputs.output_file.uuid,
+            #     self.inputs.output_file.filename,
+            #     self.inputs.output_file.filename,
+            # ),
         ]
         calcinfo.retrieve_list = [self.metadata.options.output_filename]
 
