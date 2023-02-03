@@ -50,13 +50,13 @@ docs = [
 ]
 
 [project.entry-points."aiida.data"]
-"bigdft_new" = "aiida_bigdft_new.data:DiffParameters"
+"bigdft_new" = "aiida_bigdft_new.data:BigDFTParameters"
 
 [project.entry-points."aiida.calculations"]
-"bigdft_new" = "aiida_bigdft_new.calculations:DiffCalculation"
+"bigdft_new" = "aiida_bigdft_new.calculations:BigDFTCalculation"
 
 [project.entry-points."aiida.parsers"]
-"bigdft_new" = "aiida_bigdft_new.parsers:DiffParser"
+"bigdft_new" = "aiida_bigdft_new.parsers:BigDFTParser"
 
 [project.entry-points."aiida.cmdline.data"]
 "bigdft_new" = "aiida_bigdft_new.cli:data_cli"

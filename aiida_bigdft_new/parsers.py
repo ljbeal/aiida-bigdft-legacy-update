@@ -12,7 +12,7 @@ from aiida.plugins import CalculationFactory
 DiffCalculation = CalculationFactory("bigdft_new")
 
 
-class DiffParser(Parser):
+class BigDFTParser(Parser):
     """
     Parser class for parsing output of calculation.
     """
