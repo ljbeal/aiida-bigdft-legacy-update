@@ -5,6 +5,7 @@ Register calculations via the "aiida.calculations" entry point in setup.json.
 """
 import os
 
+import yaml
 from aiida.common import datastructures
 from aiida.engine import CalcJob
 from aiida.orm import SinglefileData, StructureData, Str
@@ -98,46 +99,45 @@ class BigDFTCalculation(CalcJob):
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
 
-        def write_posinp(structure):
-            # posinp_filename = self.inputs.structurefile.value
-            posinp_filename = 'Not Written'
-            if self.inputs.structure is not None:
-                if self.inputs.structure.cell_angles != [90.0, 90.0, 90.0]:
-                    raise ValueError('non orthorhombic cells are not supported')
+        def structure_to_posinp(structure):
+            if structure.cell_angles != [90.0, 90.0, 90.0]:
+                raise ValueError('non orthorhombic cells are not supported')
 
-                print("writing input posinp file")
-                posinp_string = self.inputs.structure._prepare_xyz()[0]
-                # set bcs at the correct format (periodic only?)
-                if self.inputs.structure.pbc == (True, True, True):
-                    filestring = posinp_string.split(b'\n')
-                    line = "periodic " + str(self.inputs.structure.cell_lengths[0]) + " "\
-                           + str(self.inputs.structure.cell_lengths[1]) + " "\
-                           + str(self.inputs.structure.cell_lengths[2])
-                    filestring[1] = line.encode()
-                    posinp_string = b'\n'.join(filestring)
+            def process_line(line):
+                at = line.split()[0]
+                pos = [float(p) for p in line.split()[1:]]
 
-                if "jobname" not in self.inputs.metadata.options:
-                    posinp_filename = self._posinp
-                else:
-                    posinp_filename = self.inputs.metadata.options.jobname + ".xyz"
+                return {at: pos}
 
-                # write posinp, open file in correct format
-                fmode = 'w+' if isinstance(posinp_string, str) else 'wb+'
-                with open(posinp_filename, fmode) as posfile:
-                    posfile.write(posinp_string)
+            string = structure._prepare_xyz()[0].decode().split('\n')
 
-            return SinglefileData(os.path.join(os.getcwd(), posinp_filename)).store()
+            natoms = string[0]
+            cell = [float(v) for v in structure.cell_lengths]
+            pbc = structure.pbc
+
+            pos = [process_line(l) for l in string[2:]]
+
+            return {'posinp':
+                        {'cell': cell,
+                         'positions': pos,
+                         'units': 'angstroem'
+                         }
+                    }
 
         print('preparing for submission')
 
         inpdict = Inputfile()
         inpdict.update(self.inputs.parameters.get_dict())
 
+        inpdict.update(structure_to_posinp(self.inputs.structure))
+
         print('inp dict is')
         print(inpdict)
 
-        posinp_file = write_posinp(self.inputs.structure)
-        print('posinp written to', posinp_file)
+        with open(self._inpfile, 'w+') as o:
+            yaml.dump(dict(inpdict), o)
+
+        inp_file = SinglefileData(os.path.join(os.getcwd(), self._inpfile)).store()
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
@@ -148,11 +148,19 @@ class BigDFTCalculation(CalcJob):
         calcinfo.codes_info = [codeinfo]
         calcinfo.local_copy_list = [
             (
-                posinp_file.uuid,
-                posinp_file.filename,
-                posinp_file.filename,
+                inp_file.uuid,
+                inp_file.filename,
+                inp_file.filename,
             ),
         ]
-        calcinfo.retrieve_list = [self.metadata.options.output_filename]
+        calcinfo.retrieve_list = [
+            self.metadata.options.output_filename,
+            BigDFTCalculation._timefile,
+            "forces_posinp.yaml",
+            "forces_posinp.xyz",
+            "final_posinp.yaml",
+            "final_posinp.xyz",
+            ["./debug/bigdft-err*", ".", 2]
+        ]
 
         return calcinfo
