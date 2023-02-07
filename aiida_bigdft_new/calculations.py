@@ -116,9 +116,9 @@ class BigDFTCalculation(CalcJob):
 
             string = structure._prepare_xyz()[0].decode().split('\n')
 
-            natoms = string[0]
+            # natoms = string[0]
             cell = [float(v) for v in structure.cell_lengths]
-            pbc = structure.pbc
+            # pbc = structure.pbc
 
             pos = [process_line(l) for l in string[2:]]
 
