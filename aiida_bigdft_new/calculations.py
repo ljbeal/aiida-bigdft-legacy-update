@@ -13,7 +13,7 @@ from aiida.plugins import DataFactory
 
 from BigDFT.Inputfiles import Inputfile
 
-BigDFTParameters = DataFactory("bigdft_new")
+from aiida_bigdft_new.data import BigDFTParameters
 
 
 class BigDFTCalculation(CalcJob):

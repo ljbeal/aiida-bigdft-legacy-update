@@ -10,9 +10,8 @@ from aiida.common import exceptions
 from aiida.engine import ExitCode
 from aiida.orm import SinglefileData
 from aiida.parsers.parser import Parser
-from aiida.plugins import CalculationFactory
 
-DiffCalculation = CalculationFactory("bigdft_new")
+from aiida_bigdft_new.calculations import BigDFTCalculation
 
 
 class BigDFTParser(Parser):
@@ -30,7 +29,7 @@ class BigDFTParser(Parser):
         :param type node: :class:`aiida.orm.nodes.process.process.ProcessNode`
         """
         super().__init__(node)
-        if not issubclass(node.process_class, DiffCalculation):
+        if not issubclass(node.process_class, BigDFTCalculation):
             raise exceptions.ParsingError("Can only parse DiffCalculation")
 
     def parse_stderr(self, inputfile):
