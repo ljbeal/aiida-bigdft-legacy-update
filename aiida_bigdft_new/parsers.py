@@ -92,24 +92,21 @@ class BigDFTParser(Parser):
             return self.exit_codes.ERROR_MISSING_OUTPUT_FILES
 
         # add output file
-        self.logger.info("Parsing '{}'".format(output_filename))
+        self.logger.info(f"Parsing '{output_filename}'")
         try:
             with open(output_filename, 'w+') as tmp:
                 tmp.write(self.retrieved.get_object_content(output_filename))
                 output = SinglefileData(os.path.join(os.getcwd(), output_filename))
 
         except ValueError:
-            self.logger.error("Impossible to parse LogFile".
-                              format(output_filename))
+            self.logger.error(f"Impossible to parse LogFile {output_filename}")
             if not error:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
         try:
             output.store()
-            self.logger.info("Successfully parsed LogFile '{}'".
-                             format(output_filename))
+            self.logger.info(f"Successfully parsed LogFile '{output_filename}'")
         except ValidationError:
-            self.logger.info("Impossible to store LogFile - ignoring '{}'".
-                             format(output_filename))
+            self.logger.info(f"Impossible to store LogFile - ignoring '{output_filename}'")
             if not error:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
 
