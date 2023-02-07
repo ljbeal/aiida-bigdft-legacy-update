@@ -87,8 +87,7 @@ class BigDFTParser(Parser):
         files_expected = [output_filename]
         # Note: set(A) <= set(B) checks whether A is a subset of B
         if not set(files_expected) <= set(files_retrieved):
-            self.logger.error("Found files '{}', expected to find '{}'".format(
-                files_retrieved, files_expected))
+            self.logger.error(f"Found files '{files_retrieved}', expected to find '{files_expected}'")
             return self.exit_codes.ERROR_MISSING_OUTPUT_FILES
 
         # add output file
