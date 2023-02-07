@@ -67,6 +67,11 @@ class BigDFTCalculation(CalcJob):
             valid_type=str,
             default=BigDFTCalculation._logfile
         )
+        spec.output(
+            "logfile",
+            valid_type=SinglefileData,
+            help="BigDFT Logfile"
+        )
 
         # error codes
         spec.exit_code(
@@ -137,7 +142,7 @@ class BigDFTCalculation(CalcJob):
         with open(self._inpfile, 'w+') as o:
             yaml.dump(dict(inpdict), o)
 
-        inp_file = SinglefileData(os.path.join(os.getcwd(), self._inpfile)).store()
+        inpfile = SinglefileData(os.path.join(os.getcwd(), self._inpfile)).store()
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
@@ -148,18 +153,18 @@ class BigDFTCalculation(CalcJob):
         calcinfo.codes_info = [codeinfo]
         calcinfo.local_copy_list = [
             (
-                inp_file.uuid,
-                inp_file.filename,
-                inp_file.filename,
+                inpfile.uuid,
+                inpfile.filename,
+                inpfile.filename,
             ),
         ]
         calcinfo.retrieve_list = [
             self.metadata.options.output_filename,
-            BigDFTCalculation._timefile,
+            f'./data/{BigDFTCalculation._timefile}',
             "forces_posinp.yaml",
-            "forces_posinp.xyz",
-            "final_posinp.yaml",
-            "final_posinp.xyz",
+            # "forces_posinp.xyz",
+            # "final_posinp.yaml",
+            # "final_posinp.xyz",
             ["./debug/bigdft-err*", ".", 2]
         ]
 
