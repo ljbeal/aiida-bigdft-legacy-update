@@ -5,71 +5,7 @@
 
 # aiida-bigdft-new
 
-new aiida bigdft plugin for python 3 and aiida 2.0
-
-This plugin is the default output of the
-[AiiDA plugin cutter](https://github.com/aiidateam/aiida-plugin-cutter),
-intended to help developers get started with their AiiDA plugins.
-
-## Repository contents
-
-* [`.github/`](.github/): [Github Actions](https://github.com/features/actions) configuration
-  * [`ci.yml`](.github/workflows/ci.yml): runs tests, checks test coverage and builds documentation at every new commit
-  * [`publish-on-pypi.yml`](.github/workflows/publish-on-pypi.yml): automatically deploy git tags to PyPI - just generate a [PyPI API token](https://pypi.org/help/#apitoken) for your PyPI account and add it to the `pypi_token` secret of your github repository
-* [`aiida_bigdft_new/`](aiida_bigdft_new/): The main source code of the plugin package
-  * [`data/`](aiida_bigdft_new/data/): A new `DiffParameters` data class, used as input to the `DiffCalculation` `CalcJob` class
-  * [`calculations.py`](aiida_bigdft_new/calculations.py): A new `DiffCalculation` `CalcJob` class
-  * [`cli.py`](aiida_bigdft_new/cli.py): Extensions of the `verdi data` command line interface for the `DiffParameters` class
-  * [`helpers.py`](aiida_bigdft_new/helpers.py): Helpers for setting up an AiiDA code for `diff` automatically
-  * [`parsers.py`](aiida_bigdft_new/parsers.py): A new `Parser` for the `DiffCalculation`
-* [`docs/`](docs/): A documentation template ready for publication on [Read the Docs](http://aiida-diff.readthedocs.io/en/latest/)
-* [`examples/`](examples/): An example of how to submit a calculation using this plugin
-* [`tests/`](tests/): Basic regression tests using the [pytest](https://docs.pytest.org/en/latest/) framework (submitting a calculation, ...). Install `pip install -e .[testing]` and run `pytest`.
-* [`.gitignore`](.gitignore): Telling git which files to ignore
-* [`.pre-commit-config.yaml`](.pre-commit-config.yaml): Configuration of [pre-commit hooks](https://pre-commit.com/) that sanitize coding style and check for syntax errors. Enable via `pip install -e .[pre-commit] && pre-commit install`
-* [`.readthedocs.yml`](.readthedocs.yml): Configuration of documentation build for [Read the Docs](https://readthedocs.org/)
-* [`LICENSE`](LICENSE): License for your plugin
-* [`README.md`](README.md): This file
-* [`conftest.py`](conftest.py): Configuration of fixtures for [pytest](https://docs.pytest.org/en/latest/)
-* [`pyproject.toml`](setup.json): Python package metadata for registration on [PyPI](https://pypi.org/) and the [AiiDA plugin registry](https://aiidateam.github.io/aiida-registry/) (including entry points)
-
-See also the following video sequences from the 2019-05 AiiDA tutorial:
-
- * [run aiida-diff example calculation](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=403s)
- * [aiida-diff CalcJob plugin](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=685s)
- * [aiida-diff Parser plugin](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=936s)
- * [aiida-diff computer/code helpers](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1238s)
- * [aiida-diff input data (with validation)](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1353s)
- * [aiida-diff cli](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1621s)
- * [aiida-diff tests](https://www.youtube.com/watch?v=2CxiuiA1uVs&t=1931s)
- * [Adding your plugin to the registry](https://www.youtube.com/watch?v=760O2lDB-TM&t=112s)
- * [pre-commit hooks](https://www.youtube.com/watch?v=760O2lDB-TM&t=333s)
-
-For more information, see the [developer guide](https://aiida-diff.readthedocs.io/en/latest/developer_guide) of your plugin.
-
-
-## Features
-
- * Add input files using `SinglefileData`:
-   ```python
-   SinglefileData = DataFactory('singlefile')
-   inputs['file1'] = SinglefileData(file='/path/to/file1')
-   inputs['file2'] = SinglefileData(file='/path/to/file2')
-   ```
-
- * Specify command line options via a python dictionary and `DiffParameters`:
-   ```python
-   d = { 'ignore-case': True }
-   DiffParameters = DataFactory('bigdft_new')
-   inputs['parameters'] = DiffParameters(dict=d)
-   ```
-
- * `DiffParameters` dictionaries are validated using [voluptuous](https://github.com/alecthomas/voluptuous).
-   Find out about supported options:
-   ```python
-   DiffParameters = DataFactory('bigdft_new')
-   print(DiffParameters.schema.schema)
-   ```
+Temporary Repository for migration of [aiida-bigdft-plugin](https://github.com/ljbeal/aiida-bigdft-plugin) to python 3 and aiida 2.0
 
 ## Installation
 
