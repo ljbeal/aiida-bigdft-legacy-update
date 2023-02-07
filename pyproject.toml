@@ -35,7 +35,8 @@ testing = [
     "wheel~=0.31",
     "coverage[toml]",
     "pytest~=6.0",
-    "pytest-cov"
+    "pytest-cov",
+    "pybigdft"
 ]
 pre-commit = [
     "pre-commit~=2.2",
