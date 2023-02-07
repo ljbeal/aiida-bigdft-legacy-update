@@ -5,7 +5,6 @@ Register parsers via the "aiida.parsers" entry point in setup.json.
 """
 import os
 import re
-import tempfile
 
 from aiida.common import exceptions
 from aiida.engine import ExitCode
