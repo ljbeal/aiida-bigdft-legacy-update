@@ -11,7 +11,6 @@ from aiida.engine import ExitCode
 from aiida.orm import SinglefileData
 from aiida.parsers.parser import Parser
 from aiida.plugins import CalculationFactory
-from aiida.common.exceptions import ValidationError
 
 DiffCalculation = CalculationFactory("bigdft_new")
 
@@ -104,7 +103,7 @@ class BigDFTParser(Parser):
         try:
             output.store()
             self.logger.info(f"Successfully parsed LogFile '{output_filename}'")
-        except ValidationError:
+        except exceptions.ValidationError:
             self.logger.info(f"Impossible to store LogFile - ignoring '{output_filename}'")
             if not error:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
