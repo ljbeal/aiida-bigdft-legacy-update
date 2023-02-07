@@ -24,7 +24,7 @@ A quick demo of how to submit a calculation:
 ```shell
 verdi daemon start     # make sure the daemon is running
 cd examples
-./example_01.py        # run test calculation
+verdi run example_01.py        # run test calculation
 verdi process list -a  # check record of calculation
 ```
 

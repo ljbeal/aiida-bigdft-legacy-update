@@ -8,9 +8,12 @@ from os import path
 import click
 
 from aiida import cmdline, engine
-from aiida.plugins import CalculationFactory, DataFactory
+from aiida.orm import StructureData
+from aiida.engine import run
 
 from aiida_bigdft_new import helpers
+from aiida_bigdft_new.calculations import BigDFTCalculation
+from aiida_bigdft_new.data import BigDFTParameters
 
 INPUT_DIR = path.join(path.dirname(path.realpath(__file__)), "input_files")
 
@@ -25,32 +28,38 @@ def test_run(bigdft_new_code):
         computer = helpers.get_computer()
         bigdft_new_code = helpers.get_code(entry_point="bigdft_new", computer=computer)
 
-    # Prepare input parameters
-    DiffParameters = DataFactory("bigdft_new")
-    parameters = DiffParameters({"ignore-case": True})
+    alat = 4  # angstrom
+    cell = [
+        [alat, 0, 0, ],
+        [0, alat, 0, ],
+        [0, 0, alat, ],
+    ]
+    s = StructureData(cell=cell)
+    s.append_atom(position=(alat / 2, alat / 2, alat / 2), symbols='Ti')
+    s.append_atom(position=(alat / 2, alat / 2, 0), symbols='O')
+    s.append_atom(position=(alat / 2, 0, alat / 2), symbols='O')
 
-    SinglefileData = DataFactory("singlefile")
-    file1 = SinglefileData(file=path.join(INPUT_DIR, "file1.txt"))
-    file2 = SinglefileData(file=path.join(INPUT_DIR, "file2.txt"))
-
-    # set up calculation
     inputs = {
-        "code": bigdft_new_code,
-        "parameters": parameters,
-        "file1": file1,
-        "file2": file2,
-        "metadata": {
-            "description": "Test job submission with the aiida_bigdft_new plugin",
-        },
+        'code': bigdft_new_code,
+        'structure': s,
+        'metadata': {
+            'options': {
+                'jobname': 'TiO2',
+                'max_wallclock_seconds': 3600,
+                'queue_name': 'mono'
+            }
+        }
     }
 
-    # Note: in order to submit your calculation to the aiida daemon, do:
-    # from aiida.engine import submit
-    # future = submit(CalculationFactory('bigdft_new'), **inputs)
-    result = engine.run(CalculationFactory("bigdft_new"), **inputs)
+    bigdft_parameters = {}
+    bigdft_parameters["dft"] = {"ixc": "LDA", "itermax": "5"}
+    bigdft_parameters["output"] = {'orbitals': 'binary'}
 
-    computed_diff = result["bigdft_new"].get_content()
-    print(f"Computed diff between files: \n{computed_diff}")
+    inputs['parameters'] = BigDFTParameters(bigdft_parameters)
+
+    result = run(BigDFTCalculation, **inputs)
+
+    return result
 
 
 @click.command()
