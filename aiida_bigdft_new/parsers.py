@@ -80,7 +80,7 @@ class BigDFTParser(Parser):
                 self.logger.error("Error in stderr: " + error.message)
 
         output_filename = self.node.get_option('output_filename')
-        jobname = self.node.get_option('jobname')
+        # jobname = self.node.get_option('jobname')
         # if jobname is not None:
         #     output_filename = "log-" + jobname + ".yaml"
         # Check that folder content is as expected
