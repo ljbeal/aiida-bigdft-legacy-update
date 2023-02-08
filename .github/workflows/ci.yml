@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
 
   tests:
-    runs-on: bigdft/sdk:latest
+    runs-on: self-hosted
     timeout-minutes: 30
     strategy:
       matrix:
