@@ -36,7 +36,8 @@ class BigDFTCalculation(CalcJob):
             "num_machines": 1,
             "num_mpiprocs_per_machine": 1,
         }
-        spec.inputs["metadata"]["options"]["parser_name"].default = "bigdft_new"
+        spec.inputs["metadata"]["options"][
+            "parser_name"].default = "bigdft_new"
 
         # inputs
         # structure input. Either AiiDA structuredata, or direct posinp file
@@ -105,7 +106,6 @@ class BigDFTCalculation(CalcJob):
         """
 
         def structure_to_posinp(structure):
-
             def process_line(line):
                 at = line.split()[0]
                 pos = [float(p) for p in line.split()[1:]]
@@ -142,7 +142,8 @@ class BigDFTCalculation(CalcJob):
         with open(self._inpfile, 'w+') as o:
             yaml.dump(dict(inpdict), o)
 
-        inpfile = SinglefileData(os.path.join(os.getcwd(), self._inpfile)).store()
+        inpfile = SinglefileData(
+            os.path.join(os.getcwd(), self._inpfile)).store()
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
