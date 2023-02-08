@@ -13,6 +13,7 @@ from aiida.orm import SinglefileData, Str, StructureData
 from BigDFT.Inputfiles import Inputfile
 
 from aiida_bigdft_new.data import BigDFTParameters
+from aiida_bigdft_new.utils.preprocess import check_orthorhombic
 
 
 class BigDFTCalculation(CalcJob):
@@ -104,8 +105,6 @@ class BigDFTCalculation(CalcJob):
         """
 
         def structure_to_posinp(structure):
-            if structure.cell_angles != [90.0, 90.0, 90.0]:
-                raise ValueError('non orthorhombic cells are not supported')
 
             def process_line(line):
                 at = line.split()[0]
@@ -133,7 +132,9 @@ class BigDFTCalculation(CalcJob):
         inpdict = Inputfile()
         inpdict.update(self.inputs.parameters.get_dict())
 
-        inpdict.update(structure_to_posinp(self.inputs.structure))
+        structure = check_orthorhombic(self.inputs.structure)
+
+        inpdict.update(structure_to_posinp(structure))
 
         print('inp dict is')
         print(inpdict)
