@@ -106,11 +106,20 @@ class BigDFTCalculation(CalcJob):
         """
 
         def structure_to_posinp(structure):
+            """
+            Creates an atomic location posinp from aiida StructureData
+            """
             def process_line(line):
-                at = line.split()[0]
-                pos = [float(p) for p in line.split()[1:]]
+                """
+                xyz position lines are in the format
+                at x.0 y.0 z.0
 
-                return {at: pos}
+                split, and convert to dict
+                """
+                atmname = line.split()[0]
+                poslist = [float(p) for p in line.split()[1:]]
+
+                return {atmname: poslist}
 
             string = structure._prepare_xyz()[0].decode().split('\n')
 
@@ -118,13 +127,13 @@ class BigDFTCalculation(CalcJob):
             cell = [float(v) for v in structure.cell_lengths]
             # pbc = structure.pbc
 
-            pos = [process_line(l) for l in string[2:]]
+            pos = [process_line(line) for line in string[2:]]
 
             return {'posinp':
-                        {'cell': cell,
-                         'positions': pos,
-                         'units': 'angstroem'
-                         }
+                    {'cell': cell,
+                     'positions': pos,
+                     'units': 'angstroem'
+                     }
                     }
 
         print('preparing for submission')
