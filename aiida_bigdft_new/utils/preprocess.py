@@ -12,7 +12,7 @@ def check_orthorhombic(structure, coerce=False):
 
     print(struct_id.identity, struct_id)
 
-    raise NotImplementedError
+    raise NotImplementedError(f'cannot transform to orthogonal for {struct_id}')
 
 
 class Identifier:
@@ -36,7 +36,7 @@ class Identifier:
         self._identity = None
 
     def __repr__(self):
-        return f'cell with lengths: {self.lengths}, ' \
+        return f'{self.identity} cell with lengths: {self.lengths}, ' \
                f'angles: {self.angles}'
 
     @staticmethod
