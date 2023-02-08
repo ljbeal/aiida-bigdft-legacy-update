@@ -13,7 +13,7 @@ from aiida.orm import SinglefileData, Str, StructureData
 from BigDFT.Inputfiles import Inputfile
 
 from aiida_bigdft_new.data import BigDFTParameters
-from aiida_bigdft_new.utils.preprocess import check_orthorhombic
+from aiida_bigdft_new.utils.preprocess import check_ortho
 
 
 class BigDFTCalculation(CalcJob):
@@ -141,7 +141,7 @@ class BigDFTCalculation(CalcJob):
         inpdict = Inputfile()
         inpdict.update(self.inputs.parameters.get_dict())
 
-        structure = check_orthorhombic(self.inputs.structure)
+        structure = check_ortho(self.inputs.structure)
 
         inpdict.update(structure_to_posinp(structure))
 

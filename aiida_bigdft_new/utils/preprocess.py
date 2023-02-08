@@ -1,4 +1,4 @@
-def check_orthorhombic(structure, coerce=False):
+def check_ortho(structure, coerce=False):
     """
     Check that a structure is orthorhombic, forcing it to be so if coerce=True
     """
@@ -12,7 +12,8 @@ def check_orthorhombic(structure, coerce=False):
 
     print(struct_id.identity, struct_id)
 
-    raise NotImplementedError(f'cannot transform to orthogonal for {struct_id}')
+    raise NotImplementedError(f'cannot transform to '
+                              f'orthogonal for {struct_id}')
 
 
 class Identifier:
