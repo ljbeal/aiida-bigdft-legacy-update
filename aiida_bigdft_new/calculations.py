@@ -8,8 +8,7 @@ import os
 import yaml
 from aiida.common import datastructures
 from aiida.engine import CalcJob
-from aiida.orm import SinglefileData, StructureData, Str
-from aiida.plugins import DataFactory
+from aiida.orm import SinglefileData, Str, StructureData
 
 from BigDFT.Inputfiles import Inputfile
 
@@ -21,10 +20,10 @@ class BigDFTCalculation(CalcJob):
     AiiDA calculation plugin wrapping the BigDFT executable.
     """
 
-    _posinp = 'posinp.xyz'
-    _inpfile = 'input.yaml'
-    _logfile = 'log.yaml'
-    _timefile = 'time.yaml'
+    _posinp = "posinp.xyz"
+    _inpfile = "input.yaml"
+    _logfile = "log.yaml"
+    _timefile = "time.yaml"
 
     @classmethod
     def define(cls, spec):
