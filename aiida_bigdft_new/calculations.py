@@ -5,7 +5,12 @@ Register calculations via the "aiida.calculations" entry point in setup.json.
 """
 import os
 
+import aiida.orm
 import yaml
+from BigDFT.Atoms import Atom
+from BigDFT.Fragments import Fragment
+from BigDFT.Systems import System
+from BigDFT.UnitCells import UnitCell
 from aiida.common import datastructures
 from aiida.engine import CalcJob
 from aiida.orm import SinglefileData, Str, StructureData
@@ -105,21 +110,22 @@ class BigDFTCalculation(CalcJob):
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
 
-        def structure_to_posinp(structure):
+        def structure_to_posinp(structure: aiida.orm.StructureData) -> dict:
             """
-            Creates an atomic location posinp from aiida StructureData
+            Creates a BigDFT System from input aiida StructureData
             """
-            def process_line(line):
+            def process_line(line: str) -> [str, list]:
                 """
                 xyz position lines are in the format
-                at x.0 y.0 z.0
+                at x.x y.y z.z
 
-                split, and convert to dict
+                split, and convert
                 """
-                atmname = line.split()[0]
-                poslist = [float(p) for p in line.split()[1:]]
+                at_sym = line.split()[0]
+                at_loc = [float(p) for p in line.split()[1:]]
+                return at_sym, at_loc
 
-                return {atmname: poslist}
+            # print(f'creating bigdft System from {structure.get_description()}')
 
             string = structure._prepare_xyz()[0].decode().split('\n')
 
@@ -127,14 +133,16 @@ class BigDFTCalculation(CalcJob):
             cell = [float(v) for v in structure.cell_lengths]
             # pbc = structure.pbc
 
-            pos = [process_line(line) for line in string[2:]]
+            frag = Fragment()
+            for sym, loc in [process_line(line) for line in string[2:]]:
+                # print(f'appending {sym} at {loc}')
+                frag.append(Atom({sym: loc, 'sym': sym, 'units':'angstroem'}))
 
-            return {'posinp':
-                    {'cell': cell,
-                     'positions': pos,
-                     'units': 'angstroem'
-                     }
-                    }
+            sys = System()
+            sys.cell = UnitCell(cell, units='angstroem')
+            sys['FRA:0'] = frag
+
+            return sys.get_posinp()
 
         print('preparing for submission')
 
@@ -143,7 +151,7 @@ class BigDFTCalculation(CalcJob):
 
         structure = check_ortho(self.inputs.structure)
 
-        inpdict.update(structure_to_posinp(structure))
+        inpdict.update({'posinp': structure_to_posinp(structure)})
 
         print('inp dict is')
         print(inpdict)
