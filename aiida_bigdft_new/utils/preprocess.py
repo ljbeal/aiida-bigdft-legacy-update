@@ -7,13 +7,14 @@ def check_ortho(structure, coerce=False):
     elif not coerce:
         raise ValueError('non orthorhombic cells are not supported')
 
-    struct_id = Identifier(*structure.cell_lengths,
-                           *structure.cell_angles)
+    ase_lattice = structure.get_ase().get_cell().get_bravais_lattice()
 
-    print(struct_id.identity, struct_id)
+    lattice_variant = ase_lattice.variant
+
+    print(lattice_variant)
 
     raise NotImplementedError(f'cannot transform to '
-                              f'orthogonal for {struct_id}')
+                              f'orthogonal for {lattice_variant}')
 
 
 class Identifier:
@@ -27,6 +28,8 @@ class Identifier:
     Hexagonal    (a = b != c)	 	(a = b = 90, g = 120)   !
     Triclinic    (a != b != c)      (a != b != g != 90)     !
     """
+
+    # https://arxiv.org/pdf/1506.01455.pdf ?
 
     def __init__(self,
                  a, b, c,
