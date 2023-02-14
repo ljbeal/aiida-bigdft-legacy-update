@@ -114,6 +114,9 @@ class BigDFTCalculation(CalcJob):
         def structure_to_posinp(structure: aiida.orm.StructureData) -> dict:
             """
             Creates a BigDFT System from input aiida StructureData
+
+            This method adds a fragment to the position section,
+            though can be safely ignored.
             """
             def process_line(line: str) -> [str, list]:
                 """
