@@ -6,6 +6,7 @@ Register calculations via the "aiida.calculations" entry point in setup.json.
 import os
 from pprint import pprint
 
+import BigDFT.Systems
 import aiida.orm
 import yaml
 from BigDFT.Atoms import Atom
@@ -111,43 +112,6 @@ class BigDFTCalculation(CalcJob):
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
 
-        def structure_to_posinp(structure: aiida.orm.StructureData) -> dict:
-            """
-            Creates a BigDFT System from input aiida StructureData
-
-            This method adds a fragment to the position section,
-            though can be safely ignored.
-            """
-            def process_line(line: str) -> [str, list]:
-                """
-                xyz position lines are in the format
-                at x.x y.y z.z
-
-                split, and convert
-                """
-                at_sym = line.split()[0]
-                at_loc = [float(p) for p in line.split()[1:]]
-                return at_sym, at_loc
-
-            # print(f'creating bigdft System from {structure.get_description()}')
-
-            string = structure._prepare_xyz()[0].decode().split('\n')
-
-            # natoms = string[0]
-            cell = [float(v) for v in structure.cell_lengths]
-            # pbc = structure.pbc
-
-            frag = Fragment()
-            for sym, loc in [process_line(line) for line in string[2:]]:
-                # print(f'appending {sym} at {loc}')
-                frag.append(Atom({sym: loc, 'sym': sym, 'units':'angstroem'}))
-
-            sys = System()
-            sys.cell = UnitCell(cell, units='angstroem')
-            sys['FRA:0'] = frag
-
-            return sys.get_posinp()
-
         print('preparing for submission')
 
         inpdict = Inputfile()
@@ -155,7 +119,7 @@ class BigDFTCalculation(CalcJob):
 
         structure = check_ortho(self.inputs.structure)
 
-        inpdict.update({'posinp': structure_to_posinp(structure)})
+        inpdict.update({'posinp': structure_to_system(structure).get_posinp()})
 
         print('inp dict is')
         pprint(inpdict)
@@ -191,3 +155,42 @@ class BigDFTCalculation(CalcJob):
         ]
 
         return calcinfo
+
+
+def structure_to_system(structure: aiida.orm.StructureData) \
+        -> BigDFT.Systems.System:
+    """
+    Creates a BigDFT System from input aiida StructureData
+
+    This method adds a fragment to the position section,
+    though can be safely ignored.
+    """
+    def process_line(line: str) -> [str, list]:
+        """
+        xyz position lines are in the format
+        at x.x y.y z.z
+
+        split, and convert
+        """
+        at_sym = line.split()[0]
+        at_loc = [float(p) for p in line.split()[1:]]
+        return at_sym, at_loc
+
+    print(f'creating bigdft System from {structure.get_description()}')
+
+    string = structure._prepare_xyz()[0].decode().split('\n')
+
+    # natoms = string[0]
+    cell = [float(v) for v in structure.cell_lengths]
+    # pbc = structure.pbc
+
+    frag = Fragment()
+    for sym, loc in [process_line(line) for line in string[2:]]:
+        # print(f'appending {sym} at {loc}')
+        frag.append(Atom({sym: loc, 'sym': sym, 'units': 'angstroem'}))
+
+    sys = System()
+    sys.cell = UnitCell(cell, units='angstroem')
+    sys['FRA:0'] = frag
+
+    return sys
