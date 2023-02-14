@@ -4,6 +4,7 @@ Calculations provided by aiida_bigdft_new.
 Register calculations via the "aiida.calculations" entry point in setup.json.
 """
 import os
+from pprint import pprint
 
 import aiida.orm
 import yaml
@@ -154,7 +155,7 @@ class BigDFTCalculation(CalcJob):
         inpdict.update({'posinp': structure_to_posinp(structure)})
 
         print('inp dict is')
-        print(inpdict)
+        pprint(inpdict)
 
         with open(self._inpfile, 'w+') as o:
             yaml.dump(dict(inpdict), o)
