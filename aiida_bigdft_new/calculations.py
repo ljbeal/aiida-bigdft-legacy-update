@@ -117,9 +117,10 @@ class BigDFTCalculation(CalcJob):
         inpdict = Inputfile()
         inpdict.update(self.inputs.parameters.get_dict())
 
-        structure = check_ortho(self.inputs.structure)
+        # structure = check_ortho(self.inputs.structure)
+        structure = self.inputs.structure
 
-        inpdict.update({'posinp': structure_to_system(structure).get_posinp()})
+        inpdict.update({'posinp': structure_to_posinp(structure)})
 
         print('inp dict is')
         pprint(inpdict)
@@ -185,3 +186,41 @@ def structure_to_system(structure: aiida.orm.StructureData, coerce=False) \
     sys['FRA:0'] = frag
 
     return sys
+
+
+def structure_to_posinp(structure: aiida.orm.StructureData) -> dict:
+    """
+    Creates a posinp file from input aiida StructureData
+    """
+
+    def process_line(line: str) -> [str, list]:
+        """
+        xyz position lines are in the format
+        at x.x y.y z.z
+        split, and convert
+        """
+        at_sym = line.split()[0]
+        at_loc = [float(p) for p in line.split()[1:]]
+        return at_sym, at_loc
+
+    # print(f'creating bigdft System from {structure.get_description()}')
+
+    string = structure._prepare_xyz()[0].decode().split('\n')
+
+    # natoms = string[0]
+    # cell = [float(v) for v in structure.cell_lengths]
+    # pbc = structure.pbc
+
+    posinp = {'units': 'angstroem'}
+
+    positions = []
+    for sym, loc in [process_line(line) for line in string[2:]]:
+        # print(f'appending {sym} at {loc}')
+        # frag.append(Atom({sym: loc, 'sym': sym, 'units': 'angstroem'}))
+
+        positions.append({sym: loc})
+
+    posinp['positions'] = positions
+    posinp['abc'] = structure.get_ase().cell.tolist()
+
+    return posinp
