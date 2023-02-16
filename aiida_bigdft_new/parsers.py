@@ -68,13 +68,13 @@ class BigDFTParser(Parser):
         :returns: an exit code, if parsing fails (or nothing if parsing succeeds)
         """
 
-        error = ExitCode(0)
+        exitcode = ExitCode(0)
 
         stderr = self.node.get_scheduler_stderr()
         if stderr:
-            error = self.parse_stderr(stderr)
-            if error:
-                self.logger.error("Error in stderr: " + error.message)
+            exitcode = self.parse_stderr(stderr)
+            if exitcode:
+                self.logger.error("Error in stderr: " + exitcode.message)
 
         output_filename = self.node.get_option('output_filename')
         # jobname = self.node.get_option('jobname')
@@ -97,16 +97,16 @@ class BigDFTParser(Parser):
 
         except ValueError:
             self.logger.error(f"Impossible to parse LogFile {output_filename}")
-            if not error:  # if we already have OOW or OOM, failure here will be handled later
+            if not exitcode:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
         try:
             output.store()
             self.logger.info(f"Successfully parsed LogFile '{output_filename}'")
         except exceptions.ValidationError:
             self.logger.info(f"Impossible to store LogFile - ignoring '{output_filename}'")
-            if not error:  # if we already have OOW or OOM, failure here will be handled later
+            if not exitcode:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
 
         self.out('logfile', output)
 
-        return error
+        return exitcode
