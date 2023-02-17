@@ -14,8 +14,8 @@ from BigDFT.Fragments import Fragment
 from BigDFT.Systems import System
 from BigDFT.UnitCells import UnitCell
 from aiida.common import datastructures
-from aiida.engine import CalcJob
-from aiida.orm import SinglefileData, Str, StructureData
+from aiida.engine import CalcJob, ExitCode
+from aiida.orm import SinglefileData, Str, StructureData, Bool, to_aiida_type
 
 from BigDFT.Inputfiles import Inputfile
 
@@ -67,6 +67,14 @@ class BigDFTCalculation(CalcJob):
             "parameters",
             valid_type=BigDFTParameters,
             help="Command line parameters for BigDFT",
+        )
+
+        spec.input(
+            "write_only",
+            valid_type=Bool,
+            default=lambda: Bool(False),
+            help="Stops calculation after posinp writing if True",
+            serializer=to_aiida_type
         )
 
         # outputs
@@ -126,7 +134,18 @@ class BigDFTCalculation(CalcJob):
         pprint(inpdict)
 
         with open(self._inpfile, 'w+') as o:
+            print(f'writing inputfile {self._inpfile}')
             yaml.dump(dict(inpdict), o)
+
+        if self.inputs.write_only:
+            print('write_only is true, exiting early')
+            codeinfo = datastructures.CodeInfo()
+            codeinfo.code_uuid = self.inputs.code.uuid
+
+            calcinfo = datastructures.CalcInfo()
+            calcinfo.codes_info = [codeinfo]
+
+            return calcinfo
 
         inpfile = SinglefileData(
             os.path.join(os.getcwd(), self._inpfile)).store()
