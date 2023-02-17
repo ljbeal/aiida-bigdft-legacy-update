@@ -12,6 +12,7 @@ from aiida.orm import SinglefileData
 from aiida.parsers.parser import Parser
 
 from aiida_bigdft_new.calculations import BigDFTCalculation
+from aiida_bigdft_new.data.BigDFTFile import BigDFTFile
 
 
 class BigDFTParser(Parser):
@@ -88,25 +89,31 @@ class BigDFTParser(Parser):
             self.logger.error(f"Found files '{files_retrieved}', expected to find '{files_expected}'")
             return self.exit_codes.ERROR_MISSING_OUTPUT_FILES
 
+        logfile = self.parse_file(output_filename, 'logfile', exitcode)
+
+        self.out('logfile', logfile)
+
+        return exitcode
+
+    def parse_file(self, output_filename, name, exitcode):
+
         # add output file
         self.logger.info(f"Parsing '{output_filename}'")
         try:
             with open(output_filename, 'w+') as tmp:
                 tmp.write(self.retrieved.get_object_content(output_filename))
-                output = SinglefileData(os.path.join(os.getcwd(), output_filename))
+                output = BigDFTFile(os.path.join(os.getcwd(), output_filename))
 
         except ValueError:
-            self.logger.error(f"Impossible to parse LogFile {output_filename}")
+            self.logger.error(f"Impossible to parse {name} {output_filename}")
             if not exitcode:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
         try:
             output.store()
-            self.logger.info(f"Successfully parsed LogFile '{output_filename}'")
+            self.logger.info(f"Successfully parsed {name} '{output_filename}'")
         except exceptions.ValidationError:
-            self.logger.info(f"Impossible to store LogFile - ignoring '{output_filename}'")
+            self.logger.info(f"Impossible to store {name} - ignoring '{output_filename}'")
             if not exitcode:  # if we already have OOW or OOM, failure here will be handled later
                 return self.exit_codes.ERROR_PARSING_FAILED
 
-        self.out('logfile', output)
-
-        return exitcode
+        return output
