@@ -9,7 +9,7 @@ import click
 
 from aiida import cmdline, engine
 from aiida.orm import StructureData
-from aiida.engine import run
+from aiida.engine import run, submit
 
 from aiida_bigdft_new import helpers
 from aiida_bigdft_new.calculations import BigDFTCalculation
@@ -57,7 +57,7 @@ def test_run(bigdft_new_code):
 
     inputs['parameters'] = BigDFTParameters(bigdft_parameters)
 
-    result = run(BigDFTCalculation, **inputs)
+    result = submit(BigDFTCalculation, **inputs)
 
     return result
 
