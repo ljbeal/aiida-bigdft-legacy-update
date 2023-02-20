@@ -1,3 +1,7 @@
+"""
+Module for adding extra BigDFT functionality to AiiDA's base SinglefileData
+"""
+
 import os
 
 from BigDFT.Logfiles import Logfile
