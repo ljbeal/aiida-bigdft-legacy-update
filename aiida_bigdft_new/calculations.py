@@ -15,13 +15,12 @@ from BigDFT.UnitCells import UnitCell
 import yaml
 
 from aiida.common import datastructures
-from aiida.engine import CalcJob, ExitCode
+from aiida.engine import CalcJob
 import aiida.orm
 from aiida.orm import Bool, SinglefileData, Str, StructureData, to_aiida_type
 
 from aiida_bigdft_new.data import BigDFTParameters
 from aiida_bigdft_new.data.BigDFTFile import BigDFTFile, BigDFTLogfile
-from aiida_bigdft_new.utils.preprocess import check_ortho
 
 
 class BigDFTCalculation(CalcJob):
