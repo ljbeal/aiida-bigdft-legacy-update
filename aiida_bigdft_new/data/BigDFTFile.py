@@ -9,16 +9,23 @@ class BigDFTFile(SinglefileData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._content = self._open()
+
     def _open(self):
         try:
             with self.open() as o:
                 return yaml.safe_load(o)
         except FileNotFoundError:
-            pass
+            self.logger.warning(f'file {self.filename} could not be opened!')
+            return {}
 
     @property
     def content(self):
-        return self._open()
+        try:
+            return self._content
+        except AttributeError:
+            self._content = self._open()
+            return self._content
 
     def dump_file(self, path=None):
         """
