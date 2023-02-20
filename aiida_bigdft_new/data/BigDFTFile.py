@@ -29,6 +29,9 @@ class BigDFTFile(SinglefileData):
 
     @property
     def content(self):
+        """
+        Attempts to return file content from cache, loading otherwise
+        """
         try:
             return self._content
         except AttributeError:
