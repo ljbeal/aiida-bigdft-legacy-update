@@ -12,7 +12,7 @@ from aiida.orm import SinglefileData
 from aiida.parsers.parser import Parser
 
 from aiida_bigdft_new.calculations import BigDFTCalculation
-from aiida_bigdft_new.data.BigDFTFile import BigDFTFile
+from aiida_bigdft_new.data.BigDFTFile import BigDFTFile, BigDFTLogfile
 
 
 class BigDFTParser(Parser):
@@ -90,8 +90,10 @@ class BigDFTParser(Parser):
             return self.exit_codes.ERROR_MISSING_OUTPUT_FILES
 
         logfile = self.parse_file(output_filename, 'logfile', exitcode)
+        timefile = self.parse_file('time.yaml', 'timefile', exitcode)
 
         self.out('logfile', logfile)
+        self.out('timefile', timefile)
 
         return exitcode
 
@@ -102,7 +104,10 @@ class BigDFTParser(Parser):
         try:
             with open(output_filename, 'w+') as tmp:
                 tmp.write(self.retrieved.get_object_content(output_filename))
-                output = BigDFTFile(os.path.join(os.getcwd(), output_filename))
+                if name == 'logfile':
+                    output = BigDFTLogfile(os.path.join(os.getcwd(), output_filename))
+                else:
+                    output = BigDFTFile(os.path.join(os.getcwd(), output_filename))
 
         except ValueError:
             self.logger.error(f"Impossible to parse {name} {output_filename}")

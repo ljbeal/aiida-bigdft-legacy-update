@@ -20,7 +20,7 @@ from aiida.orm import SinglefileData, Str, StructureData, Bool, to_aiida_type
 from BigDFT.Inputfiles import Inputfile
 
 from aiida_bigdft_new.data import BigDFTParameters
-from aiida_bigdft_new.data.BigDFTFile import BigDFTFile
+from aiida_bigdft_new.data.BigDFTFile import BigDFTFile, BigDFTLogfile
 from aiida_bigdft_new.utils.preprocess import check_ortho
 
 
@@ -86,8 +86,13 @@ class BigDFTCalculation(CalcJob):
         )
         spec.output(
             "logfile",
-            valid_type=BigDFTFile,
+            valid_type=BigDFTLogfile,
             help="BigDFT Logfile"
+        )
+        spec.output(
+            "timefile",
+            valid_type=BigDFTFile,
+            help="BigDFT timing file"
         )
 
         # error codes
