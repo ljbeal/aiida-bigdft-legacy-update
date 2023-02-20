@@ -8,8 +8,8 @@ from os import path
 import click
 
 from aiida import cmdline, engine
-from aiida.orm import StructureData
 from aiida.engine import run, submit
+from aiida.orm import StructureData
 
 from aiida_bigdft_new import helpers
 from aiida_bigdft_new.calculations import BigDFTCalculation
@@ -30,32 +30,44 @@ def test_run(bigdft_new_code):
 
     alat = 4  # angstrom
     cell = [
-        [alat, 0, 0, ],
-        [0, alat, 0, ],
-        [0, 0, alat, ],
+        [
+            alat,
+            0,
+            0,
+        ],
+        [
+            0,
+            alat,
+            0,
+        ],
+        [
+            0,
+            0,
+            alat,
+        ],
     ]
     s = StructureData(cell=cell)
-    s.append_atom(position=(alat / 2, alat / 2, alat / 2), symbols='Ti')
-    s.append_atom(position=(alat / 2, alat / 2, 0), symbols='O')
-    s.append_atom(position=(alat / 2, 0, alat / 2), symbols='O')
+    s.append_atom(position=(alat / 2, alat / 2, alat / 2), symbols="Ti")
+    s.append_atom(position=(alat / 2, alat / 2, 0), symbols="O")
+    s.append_atom(position=(alat / 2, 0, alat / 2), symbols="O")
 
     inputs = {
-        'code': bigdft_new_code,
-        'structure': s,
-        'metadata': {
-            'options': {
-                'jobname': 'TiO2',
-                'max_wallclock_seconds': 3600,
-                'queue_name': 'mono'
+        "code": bigdft_new_code,
+        "structure": s,
+        "metadata": {
+            "options": {
+                "jobname": "TiO2",
+                "max_wallclock_seconds": 3600,
+                "queue_name": "mono",
             }
-        }
+        },
     }
 
     bigdft_parameters = {}
     bigdft_parameters["dft"] = {"ixc": "LDA", "itermax": "5"}
-    bigdft_parameters["output"] = {'orbitals': 'binary'}
+    bigdft_parameters["output"] = {"orbitals": "binary"}
 
-    inputs['parameters'] = BigDFTParameters(bigdft_parameters)
+    inputs["parameters"] = BigDFTParameters(bigdft_parameters)
 
     result = submit(BigDFTCalculation, **inputs)
 
