@@ -1,6 +1,6 @@
 import os
-
 import yaml
+
 from BigDFT.Logfiles import Logfile
 from aiida.orm import SinglefileData
 
@@ -8,8 +8,6 @@ from aiida.orm import SinglefileData
 class BigDFTFile(SinglefileData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self._content = self._open()
 
     def _open(self):
         try:
@@ -20,7 +18,7 @@ class BigDFTFile(SinglefileData):
 
     @property
     def content(self):
-        return self._content
+        return self._open()
 
     def dump_file(self, path=None):
         """
@@ -40,4 +38,7 @@ class BigDFTLogfile(BigDFTFile):
 
     @property
     def logfile(self):
+        """
+        Create and return the BigDFT Logfile object
+        """
         return Logfile(dictionary=self.content)
