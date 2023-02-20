@@ -52,7 +52,8 @@ docs = [
 
 [project.entry-points."aiida.data"]
 "bigdft_new" = "aiida_bigdft_new.data:BigDFTParameters"
-"logfile" = "aiida_bigdft_new.data.BigDFTFile:BigDFTFile"
+"bigdftfile" = "aiida_bigdft_new.data.BigDFTFile:BigDFTFile"
+"bigdftlogfile" = "aiida_bigdft_new.data.BigDFTFile:BigDFTLogfile"
 
 [project.entry-points."aiida.calculations"]
 "bigdft_new" = "aiida_bigdft_new.calculations:BigDFTCalculation"
