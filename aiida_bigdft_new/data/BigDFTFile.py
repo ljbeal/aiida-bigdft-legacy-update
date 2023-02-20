@@ -50,7 +50,7 @@ class BigDFTFile(SinglefileData):
         path = path or os.path.join(os.getcwd(), self.filename)
 
         with self.open() as inp:
-            with open(path, "w+") as out:
+            with open(path, "w+", encoding="utf8") as out:
                 out.write(inp.read())
 
 
