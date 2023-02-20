@@ -7,12 +7,18 @@ from aiida.orm import SinglefileData
 
 
 class BigDFTFile(SinglefileData):
+    """
+    Wrapper class for a BigDFT yaml format file as SinglefileData
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._content = self._open()
 
     def _open(self):
+        """
+        Attempts to open the stored file, returning an empty dict on failure
+        """
         try:
             with self.open() as o:
                 return yaml.safe_load(o)
@@ -41,9 +47,9 @@ class BigDFTFile(SinglefileData):
 
 
 class BigDFTLogfile(BigDFTFile):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    """
+    Specialised class for wrapping a BigDFT Logfile class as SinglefileData
+    """
     @property
     def logfile(self):
         """

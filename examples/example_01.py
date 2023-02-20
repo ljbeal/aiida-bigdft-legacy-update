@@ -7,8 +7,8 @@ from os import path
 
 import click
 
-from aiida import cmdline, engine
-from aiida.engine import run, submit
+from aiida import cmdline
+from aiida.engine import submit
 from aiida.orm import StructureData
 
 from aiida_bigdft_new import helpers
