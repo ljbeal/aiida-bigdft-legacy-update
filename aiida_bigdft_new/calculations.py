@@ -6,18 +6,18 @@ Register calculations via the "aiida.calculations" entry point in setup.json.
 import os
 from pprint import pprint
 
-import BigDFT.Systems
-import aiida.orm
-import yaml
 from BigDFT.Atoms import Atom
 from BigDFT.Fragments import Fragment
+from BigDFT.Inputfiles import Inputfile
+import BigDFT.Systems
 from BigDFT.Systems import System
 from BigDFT.UnitCells import UnitCell
+import yaml
+
 from aiida.common import datastructures
 from aiida.engine import CalcJob, ExitCode
-from aiida.orm import SinglefileData, Str, StructureData, Bool, to_aiida_type
-
-from BigDFT.Inputfiles import Inputfile
+import aiida.orm
+from aiida.orm import Bool, SinglefileData, Str, StructureData, to_aiida_type
 
 from aiida_bigdft_new.data import BigDFTParameters
 from aiida_bigdft_new.data.BigDFTFile import BigDFTFile, BigDFTLogfile
@@ -44,26 +44,18 @@ class BigDFTCalculation(CalcJob):
             "num_machines": 1,
             "num_mpiprocs_per_machine": 1,
         }
-        spec.inputs["metadata"]["options"][
-            "parser_name"].default = "bigdft_new"
+        spec.inputs["metadata"]["options"]["parser_name"].default = "bigdft_new"
 
         # inputs
         # structure input. Either AiiDA structuredata, or direct posinp file
-        spec.input(
-            "structure",
-            valid_type=StructureData
-        )
+        spec.input("structure", valid_type=StructureData)
         spec.input(
             "posinp",
             valid_type=Str,
             default=lambda: Str(BigDFTCalculation._posinp),
-            help='structure xyz file'
+            help="structure xyz file",
         )
-        spec.input(
-            "metadata.options.jobname",
-            valid_type=str,
-            required=False
-        )
+        spec.input("metadata.options.jobname", valid_type=str, required=False)
         spec.input(
             "parameters",
             valid_type=BigDFTParameters,
@@ -75,25 +67,17 @@ class BigDFTCalculation(CalcJob):
             valid_type=Bool,
             default=lambda: Bool(False),
             help="Stops calculation after posinp writing if True",
-            serializer=to_aiida_type
+            serializer=to_aiida_type,
         )
 
         # outputs
         spec.input(
             "metadata.options.output_filename",
             valid_type=str,
-            default=BigDFTCalculation._logfile
+            default=BigDFTCalculation._logfile,
         )
-        spec.output(
-            "logfile",
-            valid_type=BigDFTLogfile,
-            help="BigDFT Logfile"
-        )
-        spec.output(
-            "timefile",
-            valid_type=BigDFTFile,
-            help="BigDFT timing file"
-        )
+        spec.output("logfile", valid_type=BigDFTLogfile, help="BigDFT Logfile")
+        spec.output("timefile", valid_type=BigDFTFile, help="BigDFT timing file")
 
         # error codes
         spec.exit_code(
@@ -108,13 +92,13 @@ class BigDFTCalculation(CalcJob):
         )
         spec.exit_code(
             400,
-            'ERROR_OUT_OF_WALLTIME',
-            message='Calculation did not finish because of a walltime issue.'
+            "ERROR_OUT_OF_WALLTIME",
+            message="Calculation did not finish because of a walltime issue.",
         )
         spec.exit_code(
             401,
-            'ERROR_OUT_OF_MEMORY',
-            message='Calculation did not finish because of memory limit.'
+            "ERROR_OUT_OF_MEMORY",
+            message="Calculation did not finish because of memory limit.",
         )
 
     def prepare_for_submission(self, folder):
@@ -126,7 +110,7 @@ class BigDFTCalculation(CalcJob):
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
 
-        print('preparing for submission')
+        print("preparing for submission")
 
         inpdict = Inputfile()
         inpdict.update(self.inputs.parameters.get_dict())
@@ -134,17 +118,17 @@ class BigDFTCalculation(CalcJob):
         # structure = check_ortho(self.inputs.structure)
         structure = self.inputs.structure
 
-        inpdict.update({'posinp': structure_to_posinp(structure)})
+        inpdict.update({"posinp": structure_to_posinp(structure)})
 
-        print('inp dict is')
+        print("inp dict is")
         pprint(inpdict)
 
-        with open(self._inpfile, 'w+') as o:
-            print(f'writing inputfile {self._inpfile}')
+        with open(self._inpfile, "w+") as o:
+            print(f"writing inputfile {self._inpfile}")
             yaml.dump(dict(inpdict), o)
 
         if self.inputs.write_only:
-            print('write_only is true, exiting early')
+            print("write_only is true, exiting early")
             codeinfo = datastructures.CodeInfo()
             codeinfo.code_uuid = self.inputs.code.uuid
 
@@ -153,8 +137,7 @@ class BigDFTCalculation(CalcJob):
 
             return calcinfo
 
-        inpfile = SinglefileData(
-            os.path.join(os.getcwd(), self._inpfile)).store()
+        inpfile = SinglefileData(os.path.join(os.getcwd(), self._inpfile)).store()
 
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
@@ -172,29 +155,30 @@ class BigDFTCalculation(CalcJob):
         ]
         calcinfo.retrieve_list = [
             self.metadata.options.output_filename,
-            f'./data/{BigDFTCalculation._timefile}',
+            f"./data/{BigDFTCalculation._timefile}",
             "forces_posinp.yaml",
             # "forces_posinp.xyz",
             # "final_posinp.yaml",
             # "final_posinp.xyz",
-            ["./debug/bigdft-err*", ".", 2]
+            ["./debug/bigdft-err*", ".", 2],
         ]
 
         return calcinfo
 
 
-def structure_to_system(structure: aiida.orm.StructureData, coerce=False) \
-        -> BigDFT.Systems.System:
+def structure_to_system(
+    structure: aiida.orm.StructureData, coerce=False
+) -> BigDFT.Systems.System:
     """
     Creates a BigDFT System from input aiida StructureData
 
     This method adds a fragment to the position section,
     though can be safely ignored.
     """
-    print(f'creating bigdft System from {structure.get_description()}')
+    print(f"creating bigdft System from {structure.get_description()}")
 
     if structure.cell_angles != [90.0, 90.0, 90.0] and not coerce:
-        raise ValueError('non orthorhombic cells are not supported')
+        raise ValueError("non orthorhombic cells are not supported")
 
     as_ase = structure.get_ase()
 
@@ -204,11 +188,11 @@ def structure_to_system(structure: aiida.orm.StructureData, coerce=False) \
         sym = atom.symbol
         loc = atom.position
 
-        frag.append(Atom({sym: loc, 'sym': sym, 'units': 'angstroem'}))
+        frag.append(Atom({sym: loc, "sym": sym, "units": "angstroem"}))
 
     sys = System()
-    sys.cell = UnitCell(as_ase.cell.tolist(), units='angstroem')
-    sys['FRA:0'] = frag
+    sys.cell = UnitCell(as_ase.cell.tolist(), units="angstroem")
+    sys["FRA:0"] = frag
 
     return sys
 
@@ -230,13 +214,13 @@ def structure_to_posinp(structure: aiida.orm.StructureData) -> dict:
 
     # print(f'creating bigdft System from {structure.get_description()}')
 
-    string = structure._prepare_xyz()[0].decode().split('\n')
+    string = structure._prepare_xyz()[0].decode().split("\n")
 
     # natoms = string[0]
     # cell = [float(v) for v in structure.cell_lengths]
     # pbc = structure.pbc
 
-    posinp = {'units': 'angstroem'}
+    posinp = {"units": "angstroem"}
 
     positions = []
     for sym, loc in [process_line(line) for line in string[2:]]:
@@ -245,7 +229,7 @@ def structure_to_posinp(structure: aiida.orm.StructureData) -> dict:
 
         positions.append({sym: loc})
 
-    posinp['positions'] = positions
-    posinp['abc'] = structure.get_ase().cell.tolist()
+    posinp["positions"] = positions
+    posinp["abc"] = structure.get_ase().cell.tolist()
 
     return posinp

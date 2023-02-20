@@ -5,7 +5,7 @@ def check_ortho(structure, coerce=False):
     if structure.cell_angles == [90.0, 90.0, 90.0]:
         return structure
     elif not coerce:
-        raise ValueError('non orthorhombic cells are not supported')
+        raise ValueError("non orthorhombic cells are not supported")
 
     ase_lattice = structure.get_ase().get_cell().get_bravais_lattice()
 
@@ -13,5 +13,6 @@ def check_ortho(structure, coerce=False):
 
     print(lattice_variant)
 
-    raise NotImplementedError(f'cannot transform to '
-                              f'orthogonal for {lattice_variant}')
+    raise NotImplementedError(
+        f"cannot transform to " f"orthogonal for {lattice_variant}"
+    )

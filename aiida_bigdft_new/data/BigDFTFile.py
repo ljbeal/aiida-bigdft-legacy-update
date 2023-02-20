@@ -1,7 +1,8 @@
 import os
-import yaml
 
 from BigDFT.Logfiles import Logfile
+import yaml
+
 from aiida.orm import SinglefileData
 
 
@@ -16,7 +17,7 @@ class BigDFTFile(SinglefileData):
             with self.open() as o:
                 return yaml.safe_load(o)
         except FileNotFoundError:
-            self.logger.warning(f'file {self.filename} could not be opened!')
+            self.logger.warning(f"file {self.filename} could not be opened!")
             return {}
 
     @property
@@ -35,7 +36,7 @@ class BigDFTFile(SinglefileData):
         path = path or os.path.join(os.getcwd(), self.filename)
 
         with self.open() as inp:
-            with open(path, 'w+') as out:
+            with open(path, "w+") as out:
                 out.write(inp.read())
 
 

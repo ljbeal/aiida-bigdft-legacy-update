@@ -11,7 +11,7 @@ from aiida.orm import Dict
 
 # A subset of diff's command line options
 cmdline_options = {
-    Optional("dft"): dict,   # input filename
+    Optional("dft"): dict,  # input filename
     Optional("output"): dict,  # skip flag
 }
 
@@ -41,7 +41,9 @@ class BigDFTParameters(Dict):  # pylint: disable=too-many-ancestors
         dict = self.validate(dict)
         super().__init__(dict=dict, **kwargs)
 
-    def validate(self, parameters_dict):  # Can we remove this and put all args within an inpfile?
+    def validate(
+        self, parameters_dict
+    ):  # Can we remove this and put all args within an inpfile?
         """Validate command line options.
 
         Uses the voluptuous package for validation. Find out about allowed keys using::
