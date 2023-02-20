@@ -1,3 +1,8 @@
+"""
+Various methods and functions to preprocess or check structures
+"""
+
+
 def check_ortho(structure, coerce=False):
     """
     Check that a structure is orthorhombic, forcing it to be so if coerce=True
