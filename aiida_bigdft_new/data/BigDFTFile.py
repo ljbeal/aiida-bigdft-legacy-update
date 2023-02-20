@@ -10,6 +10,7 @@ class BigDFTFile(SinglefileData):
     """
     Wrapper class for a BigDFT yaml format file as SinglefileData
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -50,6 +51,7 @@ class BigDFTLogfile(BigDFTFile):
     """
     Specialised class for wrapping a BigDFT Logfile class as SinglefileData
     """
+
     @property
     def logfile(self):
         """
