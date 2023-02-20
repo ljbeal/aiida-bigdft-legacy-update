@@ -99,6 +99,9 @@ class BigDFTParser(Parser):
         return exitcode
 
     def parse_file(self, output_filename, name, exitcode):
+        """
+        Parse a retrieved file into a BigDFTFile object
+        """
 
         # add output file
         self.logger.info(f"Parsing '{output_filename}'")
