@@ -8,7 +8,6 @@ import re
 
 from aiida.common import exceptions
 from aiida.engine import ExitCode
-from aiida.orm import SinglefileData
 from aiida.parsers.parser import Parser
 
 from aiida_bigdft_new.calculations import BigDFTCalculation
