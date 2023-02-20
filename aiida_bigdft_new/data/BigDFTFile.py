@@ -5,9 +5,6 @@ from BigDFT.Logfiles import Logfile
 from aiida.orm import SinglefileData
 
 
-__all__ = ('BigDFTFile',)
-
-
 class BigDFTFile(SinglefileData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
