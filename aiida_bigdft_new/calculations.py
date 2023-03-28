@@ -62,7 +62,7 @@ class BigDFTCalculation(CalcJob):
         )
 
         spec.input(
-            "write_only",
+            "dry_run",
             valid_type=Bool,
             default=lambda: Bool(False),
             help="Stops calculation after posinp writing if True",
@@ -119,15 +119,15 @@ class BigDFTCalculation(CalcJob):
 
         inpdict.update({"posinp": structure_to_posinp(structure)})
 
-        print("inp dict is")
-        pprint(inpdict)
+        self.logger.info("inp dict is")
+        self.logger.info(inpdict)
 
         with open(self._inpfile, "w+") as o:
-            print(f"writing inputfile {self._inpfile}")
+            self.logger.info(f"writing inputfile {self._inpfile}")
             yaml.dump(dict(inpdict), o)
 
-        if self.inputs.write_only:
-            print("write_only is true, exiting early")
+        if self.inputs.dry_run:
+            self.logger.warning("dry_run is true, exiting early")
             codeinfo = datastructures.CodeInfo()
             codeinfo.code_uuid = self.inputs.code.uuid
 
